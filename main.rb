@@ -1,39 +1,20 @@
 require 'sinatra'
-require 'haml'
 require 'mongo_mapper'
 require 'csv'
 
 configure do
   if ENV['MONGOHQ_URL']
-      MongoMapper.config = {'playitsafe' => {'uri' => ENV['MONGOHQ_URL']}}
-      MongoMapper.connect('playitsafe')
+      MongoMapper.config = {'labsafe' => {'uri' => ENV['MONGOHQ_URL']}}
+      MongoMapper.connect('labsafe')
   else # development      
-      MongoMapper.database = 'playitsafe'
+      MongoMapper.database = 'labsafe'
   end
-end
-
-get '/startup' do
-  haml :startup 
-end
-
-get '/additional' do
-  haml :additional
-end
-
-get '/survey' do
-  haml :survey 
 end
 
 post '/startup' do
   begin
     user             = User.new
     user.sessionid   = params[:ID]
-    user.name        = params[:PlayerName]
-    user.age         = params[:PlayerAge]
-    user.postcode    = params[:PostCode]
-    user.gender      = params[:PlayerGender]
-    user.ohstraining = params[:PreviousOHSTraining]
-    user.playsgames  = params[:PlaysComputerGames]
     user.save
     status 201
   rescue
@@ -78,7 +59,7 @@ post '/survey' do
 end
 
 get '/report' do
-  filename = 'playitsafe-' + Time.now().strftime('%Y-%m-%d-%H-%M-%S') + '.csv'
+  filename = 'labsafe-' + Time.now().strftime('%Y-%m-%d-%H-%M-%S') + '.csv'
   response['Content-type']        = 'text/csv'
   response['Content-disposition'] = 'attachment; filename=' + filename
   response['Pragma']              = 'no-cache'
@@ -101,12 +82,6 @@ end
 class User
   include MongoMapper::Document
   key :sessionid,   String
-  key :name,        String
-  key :age,         String
-  key :postcode,    String
-  key :gender,      String
-  key :ohstraining, String
-  key :playsgames,  String
   key :timeskilled, String
   key :playtime,    String
   key :completed,   String
