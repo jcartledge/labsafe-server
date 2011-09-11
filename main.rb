@@ -9,6 +9,23 @@ configure do
   else # development      
       MongoMapper.database = 'labsafe'
   end
+  ADMIN_USER = ENV['ADMIN_USER'] || 'admin'
+  ADMIN_PASS = ENV['ADMIN_PASS'] || 'admin'
+end
+
+helpers do
+  def protected!
+    unless authorized?
+      response['WWW-Authenticate'] = %(Basic realm="Restricted Area")
+      throw(:halt, [401, "Not authorized\n"])
+    end
+  end
+
+  def authorized?
+    @auth ||=  Rack::Auth::Basic::Request.new(request.env)
+    @auth.provided? && @auth.basic? && @auth.credentials &&
+      @auth.credentials == [ADMIN_USER, ADMIN_PASS]
+  end
 end
 
 post '/startup' do
@@ -59,6 +76,7 @@ post '/survey' do
 end
 
 get '/report' do
+  protected!
   filename = 'labsafe-' + Time.now().strftime('%Y-%m-%d-%H-%M-%S') + '.csv'
   response['Content-type']        = 'text/csv'
   response['Content-disposition'] = 'attachment; filename=' + filename

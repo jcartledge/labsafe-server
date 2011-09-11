@@ -1,8 +1,8 @@
 require './main'     
 require 'bowtie'
 
-if ENV['BOWTIE_USER']
-  BOWTIE_AUTH = {:user => ENV['BOWTIE_USER'], :pass => ENV['BOWTIE_PASS']}
+if ENV['ADMIN_USER'] && ENV['ADMIN_PASS']
+  BOWTIE_AUTH = {:user => ENV['ADMIN_USER'], :pass => ENV['ADMIN_PASS']}
 end
 
 map '/admin' do
